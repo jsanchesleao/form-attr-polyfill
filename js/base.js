@@ -1,6 +1,6 @@
 (function() {
 
-  var ATTRIBUTE = 'poly-form';
+  var ATTRIBUTE = 'form';
 
   function getAllElements() {
     return document.querySelectorAll('['+ATTRIBUTE+']');
