@@ -41,6 +41,10 @@
   }
 
   function inputPolyfill(element) {
+    if (element.type === 'radio') {
+      return radioButtonPolyfill(element);
+    }
+
     var form = getFormFromElement(element);
     var clone = document.createElement('input');
     clone.name = element.name;
@@ -51,6 +55,33 @@
     element.onchange = function() {
       clone.value = element.value;
     };
+  }
+
+  function radioButtonPolyfill(element) {
+    var form = getFormFromElement(element);
+    function getFakeInput() {
+      var fake = form.querySelector('[name='+element.name+']');
+      if (fake) {
+        return fake;
+      }
+      else {
+        fake = document.createElement('input');
+        fake.name = element.name;
+        fake.style.display = 'none';
+        form.appendChild(fake);
+        return fake;
+      }      
+    }
+
+    if (element.checked) {
+      getFakeInput().value = element.value;
+    }
+
+    element.onchange = function() {
+      if (element.checked) {
+        getFakeInput().value = element.value;
+      }
+    }
   }
 
   doOnAllElements(function(element) {
