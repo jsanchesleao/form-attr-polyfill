@@ -48,5 +48,15 @@
   <br>
 
   <input name="outterfile" type="file" poly-form="someform"></input>
+
+  <div id="wrapper">
+    
+  </div>
+
+  <script>
+    setTimeout(function() {
+      document.getElementById('wrapper').innerHTML = 'AJAX: <input name="ajax" poly-form="someform">';
+    }, 3000);
+  </script>
 </body>
 </html>

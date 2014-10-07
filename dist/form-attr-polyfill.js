@@ -1,6 +1,6 @@
 (function() {
 
-  var ATTRIBUTE = 'form';
+  var ATTRIBUTE = 'poly-form';
 
   function getAllElements() {
     return document.querySelectorAll('['+ATTRIBUTE+']');
@@ -35,6 +35,10 @@
   }
 
   function buttonPolyfill(element) {
+    if (element.hasAlreadyDoneFormElementPolyfill) {
+      return;
+    }
+    element.hasAlreadyDoneFormElementPolyfill = true;
     var form = getFormFromElement(element);
     element.onclick = function() {
       form.submit();
@@ -42,6 +46,9 @@
   }
 
   function inputPolyfill(element) {
+    if (hasAlreadyDone(element)) {
+      return;
+    }
     if (element.type === 'submit') {
       return inputSubmitPolyfill(element);
     }
@@ -64,6 +71,11 @@
     element.onchange = function() {
       clone.value = element.value;
     };
+  }
+
+  function hasAlreadyDone(element) {
+    var form = getFormFromElement(element);
+    return !!form.querySelector('[name=' + element.name + ']');
   }
 
   function radioButtonPolyfill(element) {
@@ -109,6 +121,10 @@
   }
 
   function inputSubmitPolyfill(element) {
+    if (element.hasAlreadyDoneFormElementPolyfill) {
+      return;
+    }    
+    element.hasAlreadyDoneFormElementPolyfill = true;
     var form = getFormFromElement(element);
     var clone = document.createElement('input');
     clone.style.display = 'none';
@@ -135,5 +151,98 @@
       }
     },9);
   }());
+
+  (function (window) {
+    var last = +new Date();
+    var delay = 100;
+
+    var stack = [];
+
+    function callback() {
+        var now = +new Date();
+        if (now - last > delay) {
+            for (var i = 0; i < stack.length; i++) {
+                stack[i]();
+            }
+            last = now;
+        }
+    }
+
+    var onDomChange = function (fn, newdelay) {
+        if (newdelay) delay = newdelay;
+        stack.push(fn);
+    };
+
+    function naive() {
+        var last = document.getElementsByTagName('*');
+        var lastlen = last.length;
+        var timer = setTimeout(function check() {
+
+            var current = document.getElementsByTagName('*');
+            var len = current.length;
+            if (len != lastlen) {
+                last = [];
+            }
+            for (var i = 0; i < len; i++) {
+                if (current[i] !== last[i]) {
+                    callback();
+                    last = current;
+                    lastlen = len;
+                    break;
+                }
+            }
+            setTimeout(check, delay);
+        }, delay);
+    }
+
+    var support = {};
+
+    var el = document.documentElement;
+    var remain = 3;
+
+    function decide() {
+        if (support.DOMNodeInserted) {
+            window.addEventListener("DOMContentLoaded", function () {
+                if (support.DOMSubtreeModified) { // for FF 3+, Chrome
+                    el.addEventListener('DOMSubtreeModified', callback, false);
+                } else { // for FF 2, Safari, Opera 9.6+
+                    el.addEventListener('DOMNodeInserted', callback, false);
+                    el.addEventListener('DOMNodeRemoved', callback, false);
+                }
+            }, false);
+        } else if (document.onpropertychange) { // for IE 5.5+
+            document.onpropertychange = callback;
+        } else { // fallback
+            naive();
+        }
+    }
+
+    // checks a particular event
+    function test(event) {
+        el.addEventListener(event, function fn() {
+            support[event] = true;
+            el.removeEventListener(event, fn, false);
+            if (--remain === 0) decide();
+        }, false);
+    }
+
+    // attach test events
+    if (window.addEventListener) {
+        test('DOMSubtreeModified');
+        test('DOMNodeInserted');
+        test('DOMNodeRemoved');
+    } else {
+        decide();
+    }
+
+    // do the dummy test
+    var dummy = document.createElement("div");
+    el.appendChild(dummy);
+    el.removeChild(dummy);
+
+    onDomChange(function() {
+      setTimeout(doPolyfill, 100);
+    });
+  })(window);
 
 }())
