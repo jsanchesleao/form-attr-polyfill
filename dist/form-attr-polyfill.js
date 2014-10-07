@@ -45,6 +45,10 @@
       return radioButtonPolyfill(element);
     }
 
+    if (element.type === 'checkbox') {
+      return checkboxPolyfill(element);
+    }
+
     var form = getFormFromElement(element);
     var clone = document.createElement('input');
     clone.name = element.name;
@@ -81,6 +85,21 @@
       if (element.checked) {
         getFakeInput().value = element.value;
       }
+    }
+  }
+
+  function checkboxPolyfill(element) {
+    var form = getFormFromElement(element);
+    var clone = document.createElement('input');
+    clone.type='checkbox';
+    clone.name = element.name;
+    clone.value = element.value;
+    clone.checked = element.checked;
+    clone.style.display = 'none';
+    form.appendChild(clone);
+
+    element.onchange = function() {
+      clone.checked = element.checked;
     }
   }
 
