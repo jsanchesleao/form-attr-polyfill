@@ -2,6 +2,8 @@
 <html>
 <head>
   <title></title>
+
+  <script src="../dist/form-attr-polyfill.min.js"></script>
 </head>
 <body>
 
@@ -35,8 +37,16 @@
   <input type="checkbox" poly-form="someform" name="outtercheck" value="two">two</input>
   <input type="checkbox" poly-form="someform" name="outtercheck" value="three">three</input>
 
+  <br>
+
   <input type="submit" poly-form="someform" name="outtersubmit" value="CLICK">
 
-  <script src="../js/base.js"></script>
+  <br>
+
+  <textarea poly-form="someform" name="freetext"></textarea>
+
+  <br>
+
+  <input name="outterfile" type="file" poly-form="someform"></input>
 </body>
 </html>

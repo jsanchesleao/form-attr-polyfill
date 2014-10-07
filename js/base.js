@@ -111,18 +111,29 @@
   function inputSubmitPolyfill(element) {
     var form = getFormFromElement(element);
     var clone = document.createElement('input');
-    clone.name = element.name;
     clone.style.display = 'none';
     form.appendChild(clone);
 
     element.onclick = function() {
+      clone.name = element.name;
       clone.value = element.value;
       form.submit();
     }
   }
 
-  doOnAllElements(function(element) {
-    getPolyfill(element.tagName)(element)
-  });
+  function doPolyfill() {
+    doOnAllElements(function(element) {
+      getPolyfill(element.tagName)(element)
+    });    
+  }
+
+  (function(){
+    var t = setInterval(function(){
+      if (document.readyState === "complete") {
+        clearInterval(t);
+        doPolyfill();
+      }
+    },9);
+  }());
 
 }())
