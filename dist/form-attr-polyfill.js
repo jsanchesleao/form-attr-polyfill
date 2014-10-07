@@ -20,7 +20,8 @@
   var polyfills = {
     button: buttonPolyfill,
     input: inputPolyfill,
-    select: inputPolyfill
+    select: inputPolyfill,
+    textarea: inputPolyfill
   }
 
   function getPolyfill(_tagName) {
@@ -41,6 +42,10 @@
   }
 
   function inputPolyfill(element) {
+    if (element.type === 'submit') {
+      return inputSubmitPolyfill(element);
+    }
+
     if (element.type === 'radio') {
       return radioButtonPolyfill(element);
     }
@@ -100,6 +105,19 @@
 
     element.onchange = function() {
       clone.checked = element.checked;
+    }
+  }
+
+  function inputSubmitPolyfill(element) {
+    var form = getFormFromElement(element);
+    var clone = document.createElement('input');
+    clone.name = element.name;
+    clone.style.display = 'none';
+    form.appendChild(clone);
+
+    element.onclick = function() {
+      clone.value = element.value;
+      form.submit();
     }
   }
 
